@@ -1,0 +1,54 @@
+import { useNavigate } from 'react-router-dom'
+import { useGoogleLogin } from '@react-oauth/google'
+import { useAuthContext } from '../contexts/AuthContext'
+
+export const GoogleAuthPage = () => {
+  const navigate = useNavigate()
+  const { signInWithGoogleToken } = useAuthContext()
+
+  const login = useGoogleLogin({
+    flow: 'implicit',
+    scope: 'openid profile email https://www.googleapis.com/auth/drive.file',
+    onSuccess: async (tokenResponse) => {
+      const accessToken = (tokenResponse as any).access_token as string | undefined
+      const expiresIn = (tokenResponse as any).expires_in as number | undefined
+      if (!accessToken) return
+      await signInWithGoogleToken(accessToken, expiresIn ?? 3600)
+      navigate('/login')
+    },
+    onError: (err) => {
+      console.error('Google login error', err)
+    },
+  })
+
+  return (
+    <div className="auth-page">
+      <div className="auth-background" />
+      <div className="auth-content">
+        <div className="login-container">
+          <div className="login-card">
+            <div className="login-card__header">
+              <div className="logo">
+                <div className="logo-icon">NP</div>
+                <div className="logo-text">NovaPOS</div>
+              </div>
+            </div>
+
+            <div className="login-card__content">
+              <h1 className="login-title">Conecta tu cuenta de Google</h1>
+              <p className="login-subtitle">Sincroniza tu negocio en Google Drive de forma segura.</p>
+
+              <div className="login-card__body">
+                <button className="primary-button google-signin-button" onClick={() => login()}>
+                  Continuar con Google
+                </button>
+              </div>
+
+              <p className="auth-terms">Al continuar, aceptas los Términos de Servicio y la Política de Privacidad de NovaPOS.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
