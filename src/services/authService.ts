@@ -1,4 +1,5 @@
 import type { GoogleAuthSession } from '../types/auth'
+import type { InternalUser } from '../services/DatabaseService'
 import { STORAGE_KEYS } from '../utils/constants'
 
 const USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
@@ -56,5 +57,20 @@ export const authService = {
 
   clearSession(): void {
     localStorage.removeItem(STORAGE_KEYS.GOOGLE_SESSION)
+  },
+
+  persistInternalSession(user: InternalUser): void {
+    localStorage.setItem(STORAGE_KEYS.INTERNAL_USER, JSON.stringify(user))
+  },
+
+  restoreInternalSession(): InternalUser | null {
+    const raw = localStorage.getItem(STORAGE_KEYS.INTERNAL_USER)
+    if (!raw) return null
+
+    return JSON.parse(raw) as InternalUser
+  },
+
+  clearInternalSession(): void {
+    localStorage.removeItem(STORAGE_KEYS.INTERNAL_USER)
   },
 }

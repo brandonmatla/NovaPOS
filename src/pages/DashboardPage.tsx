@@ -1,10 +1,15 @@
-import { useAuthContext } from '../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { useAuthContext } from '../contexts/authContext'
+import { authService } from '../services/authService'
 import { Logo } from '../components/Logo'
 
 export const DashboardPage = () => {
+  const navigate = useNavigate()
   const { internalUser, signOutInternal } = useAuthContext()
+  const restoredUser = authService.restoreInternalSession()
+  const activeUser = internalUser ?? restoredUser
 
-  if (!internalUser) {
+  if (!activeUser) {
     return (
       <div className="not-authenticated-page">
         <p>No estás autenticado. Por favor, inicia sesión primero.</p>
@@ -13,8 +18,12 @@ export const DashboardPage = () => {
   }
 
   const handleSignOut = async () => {
-    await signOutInternal()
-    window.location.href = '/login'
+    try {
+      await signOutInternal()
+      navigate('/login', { replace: true })
+    } catch (error) {
+      alert('Error al sincronizar: ' + (error as Error).message)
+    }
   }
 
   return (
@@ -22,10 +31,10 @@ export const DashboardPage = () => {
       <header className="dashboard-header">
         <Logo />
         <div className="dashboard-user">
-          <img src="/favicon.svg" alt={internalUser.name} className="user-avatar" />
+          <img src="/favicon.svg" alt={activeUser.name} className="user-avatar" />
           <div className="user-info">
-            <p className="user-name">{internalUser.name}</p>
-            <p className="user-email">{internalUser.email}</p>
+            <p className="user-name">{activeUser.name}</p>
+            <p className="user-email">{activeUser.email}</p>
           </div>
         </div>
         <button type="button" className="logout-button" onClick={handleSignOut}>

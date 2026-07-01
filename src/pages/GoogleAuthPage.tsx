@@ -1,20 +1,30 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGoogleLogin } from '@react-oauth/google'
-import { useAuthContext } from '../contexts/AuthContext'
+import { useAuthContext } from '../contexts/authContext'
+
+type GoogleTokenResponse = {
+  access_token?: string
+  expires_in?: number
+}
 
 export const GoogleAuthPage = () => {
   const navigate = useNavigate()
-  const { signInWithGoogleToken } = useAuthContext()
+  const { googleSession, signInWithGoogleToken } = useAuthContext()
+
+  useEffect(() => {
+    if (googleSession) {
+      navigate('/login', { replace: true })
+    }
+  }, [googleSession, navigate])
 
   const login = useGoogleLogin({
     flow: 'implicit',
     scope: 'openid profile email https://www.googleapis.com/auth/drive.file',
     onSuccess: async (tokenResponse) => {
-      const accessToken = (tokenResponse as any).access_token as string | undefined
-      const expiresIn = (tokenResponse as any).expires_in as number | undefined
+      const { access_token: accessToken, expires_in: expiresIn } = tokenResponse as GoogleTokenResponse
       if (!accessToken) return
       await signInWithGoogleToken(accessToken, expiresIn ?? 3600)
-      navigate('/login')
     },
     onError: (err) => {
       console.error('Google login error', err)

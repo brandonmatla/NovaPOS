@@ -1,20 +1,19 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuthContext } from '../contexts/AuthContext'
+import { useAuthContext } from '../contexts/authContext'
 
 export const InternalLoginPage = () => {
   const navigate = useNavigate()
-  const { signInInternal, googleSession } = useAuthContext()
+  const { signInInternal, internalUser, changeInternalPassword } = useAuthContext()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [mustChangePassword, setMustChangePassword] = useState(false)
 
-  // Validate Google session exists and is not expired
-  React.useEffect(() => {
-    if (!googleSession) {
-      navigate('/', { replace: true })
-    }
-  }, [googleSession, navigate])
+  useEffect(() => {
+    setMustChangePassword(Boolean(internalUser?.mustChangePassword))
+  }, [internalUser?.mustChangePassword])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,6 +21,12 @@ export const InternalLoginPage = () => {
 
     try {
       const user = await signInInternal(email, password)
+
+      if (user.mustChangePassword) {
+        setMustChangePassword(true)
+        return
+      }
+
       if (user.role === 'admin') navigate('/admin', { replace: true })
       else navigate('/vendedor', { replace: true })
     } catch (err) {
@@ -29,7 +34,26 @@ export const InternalLoginPage = () => {
     }
   }
 
-  if (!googleSession) return null
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+
+    if (!newPassword || newPassword.length < 8) {
+      setError('La nueva contraseña debe tener al menos 8 caracteres')
+      return
+    }
+
+    try {
+      await changeInternalPassword(newPassword)
+      setMustChangePassword(false)
+      setPassword('')
+      setNewPassword('')
+      if (internalUser?.role === 'admin') navigate('/admin', { replace: true })
+      else navigate('/vendedor', { replace: true })
+    } catch (err) {
+      setError((err as Error).message || 'No se pudo cambiar la contraseña')
+    }
+  }
 
   return (
     <div className="auth-page">
@@ -46,7 +70,9 @@ export const InternalLoginPage = () => {
 
             <div className="login-card__content">
               <h1 className="login-title">Ingresa a tu negocio</h1>
-              <p className="login-subtitle">Accede con tu usuario y contraseña.</p>
+              <p className="login-subtitle">
+                {mustChangePassword ? 'Debes cambiar tu contraseña para continuar.' : 'Accede con tu usuario y contraseña.'}
+              </p>
 
               {error && (
                 <div className="error-banner">
@@ -61,11 +87,18 @@ export const InternalLoginPage = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="login-form">
-                <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Usuario" type="text" autoFocus />
-                <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" type="password" />
-                <button className="primary-button" type="submit">Entrar</button>
-              </form>
+              {!mustChangePassword ? (
+                <form onSubmit={handleSubmit} className="login-form">
+                  <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Usuario" type="text" autoFocus />
+                  <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" type="password" />
+                  <button className="primary-button" type="submit">Entrar</button>
+                </form>
+              ) : (
+                <form onSubmit={handlePasswordChange} className="login-form">
+                  <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nueva contraseña" type="password" autoFocus />
+                  <button className="primary-button" type="submit">Cambiar contraseña</button>
+                </form>
+              )}
             </div>
 
             <div className="login-card__footer">

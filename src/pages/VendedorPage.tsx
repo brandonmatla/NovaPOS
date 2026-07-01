@@ -1,21 +1,35 @@
-import { useAuthContext } from '../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { useAuthContext } from '../contexts/authContext'
+import { authService } from '../services/authService'
 
 export const VendedorPage = () => {
+  const navigate = useNavigate()
   const { internalUser, signOutInternal } = useAuthContext()
+  const restoredUser = authService.restoreInternalSession()
+  const activeUser = internalUser ?? restoredUser
+
+  const handleSignOut = async () => {
+    try {
+      await signOutInternal()
+      navigate('/login', { replace: true })
+    } catch (error) {
+      alert('Error al sincronizar: ' + (error as Error).message)
+    }
+  }
 
   return (
     <div className="dashboard-page">
       <div className="dashboard-header">
         <div className="dashboard-user">
-          <img className="user-avatar" src={internalUser?.name ? '/favicon.svg' : ''} alt="avatar" />
+          <img className="user-avatar" src={activeUser?.name ? '/favicon.svg' : ''} alt="avatar" />
           <div className="user-info">
-            <p className="user-name">{internalUser?.name}</p>
-            <p className="user-email">{internalUser?.email}</p>
+            <p className="user-name">{activeUser?.name}</p>
+            <p className="user-email">{activeUser?.email}</p>
           </div>
         </div>
 
         <div className="dashboard-header-actions">
-          <button className="primary-button" onClick={async () => { try { await signOutInternal(); window.location.href = '/login' } catch(e){ alert('Error al sincronizar: '+(e as Error).message)} }}>
+          <button className="primary-button" onClick={handleSignOut}>
             Cerrar sesión
           </button>
         </div>
