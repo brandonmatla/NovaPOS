@@ -1,7 +1,7 @@
 import { useAuthContext } from '../contexts/AuthContext'
 
 export const AdminPage = () => {
-  const { internalUser, signOutInternal, switchGoogleAccount } = useAuthContext()
+  const { internalUser, signOutInternal } = useAuthContext()
 
   return (
     <div className="dashboard-page">
@@ -18,9 +18,7 @@ export const AdminPage = () => {
           <button className="primary-button" onClick={async () => { try { await signOutInternal(); window.location.href = '/login' } catch(e){ alert('Error al sincronizar: '+(e as Error).message)} }}>
             Cerrar sesión
           </button>
-          <button className="primary-button" onClick={async () => { await switchGoogleAccount(); window.location.href = '/auth-google' }}>
-            Cambiar cuenta Google
-          </button>
+          
         </div>
       </div>
 

@@ -1,10 +1,10 @@
-import { useAuth } from '../hooks/useAuth'
+import { useAuthContext } from '../contexts/AuthContext'
 import { Logo } from '../components/Logo'
 
 export const DashboardPage = () => {
-  const { authState, signOut } = useAuth()
+  const { internalUser, signOutInternal } = useAuthContext()
 
-  if (!authState.googleSession) {
+  if (!internalUser) {
     return (
       <div className="not-authenticated-page">
         <p>No estás autenticado. Por favor, inicia sesión primero.</p>
@@ -12,24 +12,23 @@ export const DashboardPage = () => {
     )
   }
 
+  const handleSignOut = async () => {
+    await signOutInternal()
+    window.location.href = '/login'
+  }
+
   return (
     <div className="dashboard-page">
       <header className="dashboard-header">
         <Logo />
         <div className="dashboard-user">
-          {authState.googleSession.picture && (
-            <img
-              src={authState.googleSession.picture}
-              alt={authState.googleSession.name}
-              className="user-avatar"
-            />
-          )}
+          <img src="/favicon.svg" alt={internalUser.name} className="user-avatar" />
           <div className="user-info">
-            <p className="user-name">{authState.googleSession.name}</p>
-            <p className="user-email">{authState.googleSession.email}</p>
+            <p className="user-name">{internalUser.name}</p>
+            <p className="user-email">{internalUser.email}</p>
           </div>
         </div>
-        <button type="button" className="logout-button" onClick={signOut}>
+        <button type="button" className="logout-button" onClick={handleSignOut}>
           Cerrar sesión
         </button>
       </header>
