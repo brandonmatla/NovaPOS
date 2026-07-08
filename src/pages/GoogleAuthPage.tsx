@@ -1,5 +1,3 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAuthContext } from '../contexts/authContext'
 
@@ -9,14 +7,7 @@ type GoogleTokenResponse = {
 }
 
 export const GoogleAuthPage = () => {
-  const navigate = useNavigate()
-  const { googleSession, signInWithGoogleToken } = useAuthContext()
-
-  useEffect(() => {
-    if (googleSession) {
-      navigate('/login', { replace: true })
-    }
-  }, [googleSession, navigate])
+  const { signInWithGoogleToken } = useAuthContext()
 
   const login = useGoogleLogin({
     flow: 'implicit',

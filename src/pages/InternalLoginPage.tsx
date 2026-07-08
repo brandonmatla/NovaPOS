@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from '../contexts/authContext'
 
 export const InternalLoginPage = () => {
-  const navigate = useNavigate()
-  const { signInInternal, internalUser, changeInternalPassword } = useAuthContext()
+  const { signInInternal, internalUser, changeInternalPassword, googleSession, syncStatus, syncError, retryGoogleDriveSync } = useAuthContext()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -26,9 +24,6 @@ export const InternalLoginPage = () => {
         setMustChangePassword(true)
         return
       }
-
-      if (user.role === 'admin') navigate('/admin', { replace: true })
-      else navigate('/vendedor', { replace: true })
     } catch (err) {
       setError((err as Error).message || 'Error al autenticar')
     }
@@ -48,8 +43,6 @@ export const InternalLoginPage = () => {
       setMustChangePassword(false)
       setPassword('')
       setNewPassword('')
-      if (internalUser?.role === 'admin') navigate('/admin', { replace: true })
-      else navigate('/vendedor', { replace: true })
     } catch (err) {
       setError((err as Error).message || 'No se pudo cambiar la contraseña')
     }
@@ -60,6 +53,28 @@ export const InternalLoginPage = () => {
       <div className="auth-background" />
       <div className="auth-content">
         <div className="login-container">
+          {googleSession && syncStatus === 'syncing' && (
+            <div className="sync-snackbar sync-snackbar--info" role="status" aria-live="polite">
+              <span className="spinner sync-snackbar__spinner" />
+              <div className="sync-snackbar__content">
+                <p className="sync-snackbar__title">Sincronizando empresa.db</p>
+                <p className="sync-snackbar__text">La navegación ya está disponible mientras Drive termina su trabajo.</p>
+              </div>
+            </div>
+          )}
+
+          {googleSession && syncStatus === 'error' && syncError && (
+            <div className="sync-snackbar sync-snackbar--error" role="alert" aria-live="assertive">
+              <div className="sync-snackbar__content">
+                <p className="sync-snackbar__title">No se pudo sincronizar Google Drive</p>
+                <p className="sync-snackbar__text">{syncError}</p>
+              </div>
+              <button type="button" className="sync-snackbar__action" onClick={retryGoogleDriveSync}>
+                Reintentar
+              </button>
+            </div>
+          )}
+
           <div className="login-card">
             <div className="login-card__header">
               <div className="logo">

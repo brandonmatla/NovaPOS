@@ -427,6 +427,94 @@ input[type='password']:focus {
   opacity: 0.7;
 }
 
+.sync-snackbar {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: min(420px, calc(100vw - 48px));
+  padding: 14px 16px;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(12px);
+  animation: slideUp 0.25s ease-out;
+}
+
+.sync-snackbar--info {
+  background-color: rgba(15, 23, 42, 0.96);
+  color: white;
+}
+
+.sync-snackbar--error {
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.sync-snackbar__spinner {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.sync-snackbar__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sync-snackbar__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.sync-snackbar__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.88;
+}
+
+.sync-snackbar__action {
+  align-self: center;
+  margin-left: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sync-snackbar__action:hover {
+  opacity: 0.8;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-loading-state {
+  justify-content: flex-start;
+  width: 100%;
+}
+
 .auth-terms {
   font-size: 12px;
   color: var(--color-text-secondary);

@@ -1,17 +1,12 @@
-import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from '../contexts/authContext'
-import { authService } from '../services/authService'
 
 export const AdminPage = () => {
-  const navigate = useNavigate()
   const { internalUser, signOutInternal } = useAuthContext()
-  const restoredUser = authService.restoreInternalSession()
-  const activeUser = internalUser ?? restoredUser
+  const activeUser = internalUser
 
   const handleSignOut = async () => {
     try {
       await signOutInternal()
-      navigate('/login', { replace: true })
     } catch (error) {
       alert('Error al sincronizar: ' + (error as Error).message)
     }

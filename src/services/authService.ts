@@ -67,7 +67,12 @@ export const authService = {
     const raw = localStorage.getItem(STORAGE_KEYS.INTERNAL_USER)
     if (!raw) return null
 
-    return JSON.parse(raw) as InternalUser
+    try {
+      return JSON.parse(raw) as InternalUser
+    } catch {
+      localStorage.removeItem(STORAGE_KEYS.INTERNAL_USER)
+      return null
+    }
   },
 
   clearInternalSession(): void {
